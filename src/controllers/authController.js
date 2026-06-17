@@ -10,7 +10,8 @@ const register = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password, role } = req.body;
+  const { name, password, role } = req.body;
+  const email = req.body.email.toLowerCase().trim();
 
   const existing = users.find((u) => u.email === email);
   if (existing) {
@@ -21,7 +22,7 @@ const register = async (req, res) => {
 
   const user = {
     id: uuidv4(),
-    name,
+    name: name.trim(),
     email,
     password: hashedPassword,
     role: role === 'organizer' ? 'organizer' : 'attendee',
@@ -49,7 +50,8 @@ const login = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password } = req.body;
+  const email = req.body.email.toLowerCase().trim();
+  const { password } = req.body;
 
   const user = users.find((u) => u.email === email);
   if (!user) {
