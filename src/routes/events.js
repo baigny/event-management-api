@@ -26,9 +26,9 @@ const updateValidation = [
   body('location').optional().trim(),
 ];
 
-// Authenticated users can read events
-router.get('/', authenticate, getEvents);
-router.get('/:id', authenticate, getEvent);
+// Public read
+router.get('/', getEvents);
+router.get('/:id', getEvent);
 
 // Organizers only for write operations
 router.post('/', authenticate, authorizeOrganizer, createValidation, createEvent);
@@ -36,8 +36,8 @@ router.put('/:id', authenticate, authorizeOrganizer, updateValidation, updateEve
 router.delete('/:id', authenticate, authorizeOrganizer, deleteEvent);
 
 // Participant management
-router.post('/:id/participants', authenticate, registerForEvent);
-router.delete('/:id/participants', authenticate, unregisterFromEvent);
+router.post('/:id/register', authenticate, registerForEvent);
+router.delete('/:id/register', authenticate, unregisterFromEvent);
 router.get('/:id/participants', authenticate, getParticipants);
 
 module.exports = router;
