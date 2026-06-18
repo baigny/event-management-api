@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const { authenticate, authorizeOrganizer } = require('../middleware/auth');
-const { createEvent, getEvents, getEvent, updateEvent, deleteEvent } = require('../controllers/eventsController');
+const { createEvent, getEvents, getEvent, updateEvent, deleteEvent, registerForEvent, unregisterFromEvent, getParticipants } = require('../controllers/eventsController');
 
 const router = express.Router();
 
@@ -34,5 +34,10 @@ router.get('/:id', authenticate, getEvent);
 router.post('/', authenticate, authorizeOrganizer, createValidation, createEvent);
 router.put('/:id', authenticate, authorizeOrganizer, updateValidation, updateEvent);
 router.delete('/:id', authenticate, authorizeOrganizer, deleteEvent);
+
+// Participant management
+router.post('/:id/participants', authenticate, registerForEvent);
+router.delete('/:id/participants', authenticate, unregisterFromEvent);
+router.get('/:id/participants', authenticate, getParticipants);
 
 module.exports = router;

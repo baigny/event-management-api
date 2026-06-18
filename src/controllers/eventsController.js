@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
-const { events } = require('../data/store');
+const { events, users } = require('../data/store');
 
 const createEvent = (req, res) => {
   const errors = validationResult(req);
@@ -82,4 +82,60 @@ const deleteEvent = (req, res) => {
   res.json({ message: 'Event deleted successfully' });
 };
 
-module.exports = { createEvent, getEvents, getEvent, updateEvent, deleteEvent };
+const registerForEvent = (req, res) => {
+  const event = events.find((e) => e.id === req.params.id);
+  if (!event) {
+    return res.status(404).json({ message: 'Event not found' });
+  }
+
+  if (event.organizerId === req.user.id) {
+    return res.status(400).json({ message: 'Organizers cannot register for their own events' });
+  }
+
+  const alreadyRegistered = event.participants.some((p) => p.userId === req.user.id);
+  if (alreadyRegistered) {
+    return res.status(409).json({ message: 'Already registered for this event' });
+  }
+
+  const user = users.find((u) => u.id === req.user.id);
+
+  event.participants.push({
+    userId: req.user.id,
+    name: user.name,
+    email: user.email,
+    registeredAt: new Date().toISOString(),
+  });
+
+  res.status(201).json({ message: 'Successfully registered for the event' });
+};
+
+const unregisterFromEvent = (req, res) => {
+  const event = events.find((e) => e.id === req.params.id);
+  if (!event) {
+    return res.status(404).json({ message: 'Event not found' });
+  }
+
+  const index = event.participants.findIndex((p) => p.userId === req.user.id);
+  if (index === -1) {
+    return res.status(404).json({ message: 'You are not registered for this event' });
+  }
+
+  event.participants.splice(index, 1);
+
+  res.json({ message: 'Successfully unregistered from the event' });
+};
+
+const getParticipants = (req, res) => {
+  const event = events.find((e) => e.id === req.params.id);
+  if (!event) {
+    return res.status(404).json({ message: 'Event not found' });
+  }
+
+  if (event.organizerId !== req.user.id) {
+    return res.status(403).json({ message: 'Only the event organizer can view participants' });
+  }
+
+  res.json({ count: event.participants.length, participants: event.participants });
+};
+
+module.exports = { createEvent, getEvents, getEvent, updateEvent, deleteEvent, registerForEvent, unregisterFromEvent, getParticipants };
