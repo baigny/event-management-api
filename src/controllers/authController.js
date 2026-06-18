@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 const { users } = require('../data/store');
+const { sendWelcomeEmail } = require('../utils/emailService');
 
 const register = async (req, res) => {
   const errors = validationResult(req);
@@ -35,6 +36,10 @@ const register = async (req, res) => {
     { id: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
+  );
+
+  sendWelcomeEmail(user).catch((err) =>
+    console.error('Welcome email failed:', err.message)
   );
 
   res.status(201).json({

@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
 const { events, users } = require('../data/store');
+const { sendEventRegistrationEmail } = require('../utils/emailService');
 
 const createEvent = (req, res) => {
   const errors = validationResult(req);
@@ -82,7 +83,7 @@ const deleteEvent = (req, res) => {
   res.json({ message: 'Event deleted successfully' });
 };
 
-const registerForEvent = (req, res) => {
+const registerForEvent = async (req, res) => {
   const event = events.find((e) => e.id === req.params.id);
   if (!event) {
     return res.status(404).json({ message: 'Event not found' });
@@ -105,6 +106,10 @@ const registerForEvent = (req, res) => {
     email: user.email,
     registeredAt: new Date().toISOString(),
   });
+
+  sendEventRegistrationEmail(user, event).catch((err) =>
+    console.error('Event registration email failed:', err.message)
+  );
 
   res.status(201).json({ message: 'Successfully registered for the event' });
 };
