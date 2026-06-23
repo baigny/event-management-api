@@ -38,7 +38,7 @@ const register = async (req, res) => {
     { expiresIn: '7d' }
   );
 
-  sendWelcomeEmail(user).catch((err) =>
+  sendWelcomeEmail(user.email, user.name).catch((err) =>
     console.error('Welcome email failed:', err.message)
   );
 
@@ -81,4 +81,9 @@ const login = async (req, res) => {
   });
 };
 
-module.exports = { register, login };
+const getUsers = (req, res) => {
+  const safeUsers = users.map(({ id, name, email, role, createdAt }) => ({ id, name, email, role, createdAt }));
+  res.json({ count: safeUsers.length, users: safeUsers });
+};
+
+module.exports = { register, login, getUsers };
