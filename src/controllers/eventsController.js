@@ -83,7 +83,7 @@ const deleteEvent = (req, res) => {
   res.json({ message: 'Event deleted successfully' });
 };
 
-const registerForEvent = async (req, res) => {
+const registerForEvent = (req, res) => {
   const event = events.find((e) => e.id === req.params.id);
   if (!event) {
     return res.status(404).json({ message: 'Event not found' });
@@ -107,7 +107,7 @@ const registerForEvent = async (req, res) => {
     registeredAt: new Date().toISOString(),
   });
 
-  sendEventRegistrationEmail(user, event).catch((err) =>
+  sendEventRegistrationEmail(user.email, user.name, event.title).catch((err) =>
     console.error('Event registration email failed:', err.message)
   );
 
